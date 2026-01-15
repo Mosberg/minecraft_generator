@@ -1,39 +1,49 @@
 package dk.mosberg.generator;
 
-import java.util.Map;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
-/**
- * Utility for handling Minecraft-specific asset formats (models, blockstates, recipes, lang).
- */
-public class MinecraftFormatUtils {
-    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+public final class MinecraftFormatUtils {
 
-    public static String toModelJson(Map<String, Object> properties) {
-        // Example: create a basic block model
-        Map<String, Object> model =
-                Map.of("parent", properties.getOrDefault("parent", "block/cube_all"), "textures",
-                        properties.get("textures"));
-        return gson.toJson(model);
+    private MinecraftFormatUtils() {}
+
+    public static JsonObject cubeAllBlockModel(String modid, String textureName) {
+        // block/cube_all with texture 'all'
+        JsonObject textures = new JsonObject();
+        textures.addProperty("all", modid + ":block/" + textureName);
+
+        JsonObject model = new JsonObject();
+        model.addProperty("parent", "minecraft:block/cube_all");
+        model.add("textures", textures);
+        return model;
     }
 
-    public static String toBlockstateJson(Map<String, Object> properties) {
-        // Example: create a simple blockstate
-        Map<String, Object> blockstate = Map.of("variants", properties.get("variants"));
-        return gson.toJson(blockstate);
+    public static JsonObject blockItemModel(String modid, String blockName) {
+        // item model pointing to block model
+        JsonObject model = new JsonObject();
+        model.addProperty("parent", modid + ":block/" + blockName);
+        return model;
     }
 
-    public static String toRecipeJson(Map<String, Object> properties) {
-        // Example: shaped recipe
-        Map<String, Object> recipe =
-                Map.of("type", properties.getOrDefault("type", "minecraft:crafting_shaped"),
-                        "pattern", properties.get("pattern"), "key", properties.get("key"),
-                        "result", properties.get("result"));
-        return gson.toJson(recipe);
+    public static JsonObject generatedItemModel(String modid, String textureName) {
+        JsonObject textures = new JsonObject();
+        textures.addProperty("layer0", modid + ":item/" + textureName);
+
+        JsonObject model = new JsonObject();
+        model.addProperty("parent", "minecraft:item/generated");
+        model.add("textures", textures);
+        return model;
     }
 
-    public static String toLangEntry(String key, String value) {
-        return String.format("\"%s\": \"%s\"", key, value);
+    public static JsonObject singletonBlockstate(String modid, String modelPathNoExt) {
+        // { "variants": { "": { "model": "<modid>:block/<name>" } } }
+        JsonObject model = new JsonObject();
+        model.addProperty("model", modid + ":" + modelPathNoExt);
+
+        JsonObject variant = new JsonObject();
+        variant.add("", model);
+
+        JsonObject root = new JsonObject();
+        root.add("variants", variant);
+        return root;
     }
 }

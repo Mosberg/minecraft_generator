@@ -1,41 +1,49 @@
 package dk.mosberg.generator;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Type;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-/**
- * Handles reading and validating JSON asset configuration files.
- */
-public class AssetConfigLoader {
-    private final Gson gson = new Gson();
-    private final SchemaValidator schemaValidator;
+public final class AssetConfigLoader {
 
-    public AssetConfigLoader(SchemaValidator schemaValidator) {
-        this.schemaValidator = schemaValidator;
+    private final Path inputDir;
+    private final SchemaValidator validator;
+
+    public AssetConfigLoader(Path inputDir, SchemaValidator validator) {
+        this.inputDir = inputDir;
+        this.validator = validator;
     }
 
-    /**
-     * Loads and validates asset definitions from a JSON file.
-     * 
-     * @param jsonPath Path to the JSON file
-     * @param schemaPath Path to the JSON schema file
-     * @return List of AssetDefinition objects
-     * @throws IOException if file read fails
-     */
-    public List<AssetDefinition> loadAssets(String jsonPath, String schemaPath) throws IOException {
-        // Validate JSON against schema
-        if (!schemaValidator.validate(jsonPath, schemaPath)) {
-            throw new IOException("JSON validation failed for " + jsonPath);
+    public List<MaterialDefinition> loadMaterials() throws Exception {
+        Path materialsDir = inputDir.resolve("materials");
+        Path schemaPath = inputDir.resolve("schemas").resolve("material.schema.json");
+
+        List<Path> files = FileUtils.listJsonFiles(materialsDir);
+        List<MaterialDefinition> materials = new ArrayList<>();
+
+        for (Path f : files) {
+            if (!validator.validateFile(f, schemaPath)) {
+                String msg = "Material failed schema validation: " + f;
+                if (validator.strict())
+                    throw new IllegalArgumentException(msg);
+                Log.warn(msg);
+                continue;
+            }
+
+            MaterialDefinition mat =
+                    FileUtils.GSON.fromJson(FileUtils.readString(f), MaterialDefinition.class);
+            if (mat == null) {
+                String msg = "Material JSON is null/invalid: " + f;
+                if (validator.strict())
+                    throw new IllegalArgumentException(msg);
+                Log.warn(msg);
+                continue;
+            }
+
+            materials.add(mat);
         }
-        // Parse JSON
-        try (FileReader reader = new FileReader(jsonPath)) {
-            Type listType = new TypeToken<ArrayList<AssetDefinition>>() {}.getType();
-            return gson.fromJson(reader, listType);
-        }
+
+        Log.info("Loaded materials: " + materials.size());
+        return materials;
     }
 }

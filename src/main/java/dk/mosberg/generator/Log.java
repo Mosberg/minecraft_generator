@@ -3,11 +3,11 @@ package dk.mosberg.generator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Centralized SLF4J logger for diagnostics and error reporting.
- */
-public class Log {
+public final class Log {
+
     private static final Logger logger = LoggerFactory.getLogger("MinecraftAssetGenerator");
+
+    private Log() {}
 
     public static void info(String msg) {
         logger.info(msg);
