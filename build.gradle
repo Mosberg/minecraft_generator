@@ -1,0 +1,229 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'maven-publish'
+    id 'distribution'
+    id 'com.gradleup.shadow' version "${shadow_version}"
+}
+
+group = providers.gradleProperty('group').get()
+version = providers.gradleProperty('version').get()
+
+dependencies {
+    // JSON parsing
+    implementation "com.google.code.gson:gson:${gson_version}"
+
+    // Logging (keep simple; replace with logback-classic later if you want config files)
+    implementation "org.slf4j:slf4j-api:${slf4j_version}"
+    runtimeOnly   "org.slf4j:slf4j-simple:${slf4j_version}"
+
+    // Annotations
+    compileOnly "org.jetbrains:annotations:${annotations_version}"
+
+    // Testing
+    testImplementation platform("org.junit:junit-bom:${junit_version}")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+application {
+    // Use the actual entrypoint you already put in the manifest.
+    // (Your current file had dk.mosberg here, which is likely not a real main class.)
+    mainClass = providers.gradleProperty('main_class').get()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(providers.gradleProperty('java_version').get().toInteger())
+    }
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = providers.gradleProperty('java_version').get().toInteger()
+    options.compilerArgs += ['-Xlint:deprecation', '-Xlint:unchecked']
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+        exceptionFormat = 'full'
+        showStandardStreams = false
+    }
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
+/**
+ * Keep the default jar as a thin jar (no dependency unpacking).
+ * Use shadowJar for a runnable all-in-one artifact.
+ */
+tasks.named('jar', Jar).configure {
+    archiveBaseName = providers.gradleProperty('archives_base_name').get()
+
+    manifest {
+        attributes(
+            'Main-Class': providers.gradleProperty('main_class').get(),
+            'Implementation-Title': providers.gradleProperty('name').getOrElse(project.name),
+            'Implementation-Version': project.version,
+            'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        )
+    }
+}
+
+/**
+ * Proper shaded runnable jar.
+ */
+tasks.named('shadowJar', com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar).configure {
+    archiveBaseName = providers.gradleProperty('archives_base_name').get()
+    archiveClassifier = 'all'
+    mergeServiceFiles()
+    // Optional: minimizes jar by removing unused classes; can break reflection-heavy code.
+    if (providers.gradleProperty('shadow_minimize').getOrElse('false').toBoolean()) {
+        minimize()
+    }
+    manifest {
+        attributes(
+            'Main-Class': providers.gradleProperty('main_class').get()
+        )
+    }
+}
+
+tasks.assemble {
+    dependsOn tasks.shadowJar
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Generator tasks
+// ─────────────────────────────────────────────────────────────────────────────
+
+tasks.register('generate', JavaExec) {
+    group = 'generator'
+    description = 'Generates material-based assets'
+
+    def resourcesDir = layout.projectDirectory.dir(providers.gradleProperty('generator_input_dir').getOrElse('src/main/resources'))
+    def outputDir    = layout.projectDirectory.dir(providers.gradleProperty('generator_output_dir').getOrElse('output'))
+
+    dependsOn 'classes'
+
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = providers.gradleProperty('main_class').get()
+    workingDir = layout.projectDirectory.asFile
+
+    // Keep your current argument style (input, output), but make it configurable.
+    args resourcesDir.asFile.absolutePath, outputDir.asFile.absolutePath
+
+    doFirst {
+        println "═══════════════════════════════════════"
+        println "  Minecraft Asset Generator"
+        println "═══════════════════════════════════════"
+        println "Input:  ${resourcesDir.asFile}"
+        println "Output: ${outputDir.asFile}"
+        println ""
+    }
+}
+
+tasks.register('cleanGenerated', Delete) {
+    group = 'generator'
+    description = 'Removes all generated assets'
+
+    def outputDir = providers.gradleProperty('generator_output_dir').getOrElse('output')
+    delete layout.projectDirectory.dir(outputDir)
+
+    doLast {
+        println "✓ Cleaned generated assets"
+    }
+}
+
+tasks.register('regenerate') {
+    group = 'generator'
+    description = 'Cleans and regenerates all assets'
+
+    dependsOn 'cleanGenerated', 'generate'
+    tasks.named('generate').configure { mustRunAfter 'cleanGenerated' }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Distributions
+// ─────────────────────────────────────────────────────────────────────────────
+
+distributions {
+    main {
+        distributionBaseName = providers.gradleProperty('archives_base_name').get()
+        contents {
+            from(tasks.shadowJar) {
+                into 'bin'
+            }
+            from('src/main/resources') {
+                into 'resources'
+            }
+            from('README.md') {
+                into ''
+            }
+            from('LICENSE') {
+                into ''
+            }
+        }
+    }
+}
+
+tasks.named('distZip', Zip).configure {
+    archiveVersion = project.version.toString()
+}
+
+tasks.register('info') {
+    group = 'help'
+    description = 'Displays project information'
+
+    doLast {
+        println """
+            ═══════════════════════════════════════
+            Minecraft Asset Generator Project Information
+            ═══════════════════════════════════════
+            Group:          ${project.group}
+            Version:        ${project.version}
+            Java Version:   ${providers.gradleProperty('java_version').get()}
+            Gradle Version: ${gradle.gradleVersion}
+            Main Class:     ${providers.gradleProperty('main_class').get()}
+            ═══════════════════════════════════════
+        """.stripIndent()
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Publishing (publishes thin jar + sources/javadoc; shaded jar can be added if desired)
+// ─────────────────────────────────────────────────────────────────────────────
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            pom {
+                name = providers.gradleProperty('name').getOrElse('Minecraft Asset Generator')
+                description = providers.gradleProperty('description').getOrElse('Generates Minecraft mod assets')
+                url = providers.gradleProperty('project_url').getOrElse('https://github.com/mosberg/minecraft_generator')
+
+                licenses {
+                    license {
+                        name = providers.gradleProperty('license').getOrElse('MIT License')
+                        url = 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        name = providers.gradleProperty('author').getOrElse('Mosberg')
+                    }
+                }
+            }
+        }
+    }
+}
