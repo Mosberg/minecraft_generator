@@ -1,49 +1,55 @@
-# Minecraft Asset Generator - AI Coding Guidelines
+# Minecraft Asset Generator — AI Coding Guidelines
 
-## Project Architecture
+## Architecture Overview
 
-- **Purpose**: JSON-driven Minecraft Java Edition asset generator with schema validation and texture recoloring
-- **Entry Point**: `dk.mosberg.generator.Generator` (main class defined in `gradle.properties`)
-- **Data Flow**: JSON configs in `src/main/resources` → Generator → Assets in `output/` directory
-- **Modular Design**: Extensible for new asset types via JSON schemas in `src/main/resources/schemas/`
+- **Purpose:** Generate Minecraft Java Edition assets (models, blockstates, recipes, lang, textures) from schema-validated JSON and reproducible texture recoloring.
+- **Main Entry Point:** [src/main/java/dk/mosberg/generator/Generator.java](../src/main/java/dk/mosberg/generator/Generator.java) (class name set in [gradle.properties](../gradle.properties))
+- **Data Flow:** JSON configs in [src/main/resources/](../src/main/resources/) → Generator → output in [output/](../output/)
+- **Extensibility:** Add new asset types via JSON schemas ([src/main/resources/schemas/](../src/main/resources/schemas/)).
 
-## Build System & Workflows
+## Build & Workflow
 
-- **Primary Build Tool**: Gradle with custom tasks (`generate`, `cleanGenerated`, `regenerate`)
-- **Generation Command**: `./gradlew generate` (uses `generator_input_dir` and `generator_output_dir` from `gradle.properties`)
-- **Distribution**: Use `shadowJar` for fat JAR (includes all dependencies), `distZip` for complete distribution
-- **Testing**: JUnit Jupiter (v6.0.2) with `useJUnitPlatform()` and custom logging configuration
+- **Build Tool:** Gradle (see [build.gradle](../build.gradle))
+- **Key Tasks:**
+  - `generate`: Runs asset generation (`./gradlew generate`).
+  - `cleanGenerated`: Removes generated assets (`./gradlew cleanGenerated`).
+  - `regenerate`: Cleans and regenerates assets (`./gradlew regenerate`).
+  - `shadowJar`: Builds fat JAR with dependencies (`./gradlew shadowJar`).
+  - `distZip`: Creates ZIP distribution (`./gradlew distZip`).
+- **Testing:** JUnit Jupiter (v6.0.2) with custom logging (see [build.gradle](../build.gradle)).
+- **Run Application:** `./gradlew run` (uses main class from [gradle.properties](../gradle.properties)).
 
-## Key Configuration Files
+## Configuration & Conventions
 
-- **`gradle.properties`**: Centralized version management and project settings (Java 21, dependency versions)
-- **`build.gradle`**: Custom tasks for asset generation workflow, manifest configuration, and distribution setup
-- **Compiler Settings**: Java 21 with `-Xlint:deprecation` and `-Xlint:unchecked` flags
+- **Central Config:** [gradle.properties](../gradle.properties) — controls Java version, dependency versions, input/output directories, main class.
+- **Compiler:** Java 21, strict linting (`-Xlint:deprecation`, `-Xlint:unchecked`).
+- **Dependencies:**
+  - Gson 2.13.2 (JSON parsing)
+  - SLF4J 2.0.17 (logging, console output)
+  - JetBrains Annotations 26.0.2 (null-safety)
+  - Shadow plugin 9.3.1 (fat JAR)
+- **Package Naming:** Use `dk.mosberg.generator.*` for all source files.
+- **Resource Layout:**
+  - Place JSON schemas in [src/main/resources/schemas/](../src/main/resources/schemas/)
+  - Place base textures in [src/main/resources/textures/](../src/main/resources/textures/)
+- **Manifest:** JAR manifest includes main class and implementation details (see [build.gradle](../build.gradle)).
+- **Error Handling:** Use SLF4J for all diagnostics.
 
-## Dependencies & Libraries
+## Example Workflow
 
-- **JSON Processing**: Gson 2.13.2 for parsing configuration files
-- **Logging**: SLF4J 2.0.17 with simple runtime binding (keep lightweight)
-- **Annotations**: JetBrains Annotations 26.0.2 for null-safety
-- **Shadow Plugin**: 9.3.1 for creating runnable fat JARs with merged service files
-
-## Code Patterns
-
-- **Package Structure**: `dk.mosberg.generator.*` - follow this naming convention
-- **Resource Organization**: Place JSON schemas in `src/main/resources/schemas/`, textures in `src/main/resources/textures/`
-- **JAR Manifest**: Include main class and implementation details as configured in `build.gradle` tasks
-- **Error Handling**: Use SLF4J logging for diagnostics (configured for console output)
-
-## Development Workflow
-
-1. Edit JSON configurations in `src/main/resources/`
-2. Run `./gradlew generate` to produce assets in `output/` directory
-3. Use `./gradlew regenerate` for clean rebuilds
+1. Edit JSON configs in [src/main/resources/](../src/main/resources/)
+2. Run `./gradlew generate` to produce assets in [output/](../output/)
+3. Use `./gradlew regenerate` for a clean rebuild
 4. Build distributions with `./gradlew shadowJar` or `./gradlew distZip`
 
-## File References
+## Key File References
 
-- [build.gradle](../build.gradle): Custom generation tasks and arguments handling
-- [gradle.properties](../gradle.properties): Main class and directory configuration
-- [src/main/resources/](../src/main/resources/): Input directory structure for JSON configs and assets</content>
-  <parameter name="filePath">c:\Users\Rasmu\Documents\Projects\Java\minecraft_generator\.github\copilot-instructions.md
+- [build.gradle](../build.gradle): Custom generator tasks and argument handling
+- [gradle.properties](../gradle.properties): Entrypoint, directories, and version management
+- [src/main/resources/](../src/main/resources/): Input configs and templates
+- [output/](../output/): Generated assets
+
+---
+
+For new asset types, add schemas to [src/main/resources/schemas/](../src/main/resources/schemas/). For new generation logic, extend [src/main/java/dk/mosberg/generator/Generator.java](../src/main/java/dk/mosberg/generator/Generator.java) and follow the established package/resource conventions.
+<parameter name="filePath">c:\Users\Rasmu\Documents\Projects\Java\minecraft_generator\.github\copilot-instructions.md

@@ -147,8 +147,9 @@ tasks.register('regenerate') {
     description = 'Cleans and regenerates all assets'
 
     dependsOn 'cleanGenerated', 'generate'
-    tasks.named('generate').configure { mustRunAfter 'cleanGenerated' }
 }
+// Ensure correct ordering outside the registration block (Gradle 9+):
+tasks.named('generate').configure { mustRunAfter(tasks.named('cleanGenerated')) }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Distributions
