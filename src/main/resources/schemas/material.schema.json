@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosberg.github.io/schemas/generator/material.schema.json",
+  "title": "Material Definition",
+  "description": "Canonical schema-driven material input used by generation steps.",
+  "type": "object",
+  "required": ["schema", "id", "name", "category", "palette"],
+  "properties": {
+    "schema": { "const": "material" },
+    "id": { "$ref": "common.schema.json#/$defs/snakeId" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+
+    "category": { "$ref": "common.schema.json#/$defs/categoryId" },
+
+    "palette": { "$ref": "common.schema.json#/$defs/snakeId" },
+
+    "texture_overrides": {
+      "type": "object",
+      "description": "Optional explicit texture source overrides (skip recolor/lookup for these).",
+      "properties": {
+        "block": { "$ref": "common.schema.json#/$defs/texturePngPath" },
+        "item": { "$ref": "common.schema.json#/$defs/texturePngPath" },
+        "particle": { "$ref": "common.schema.json#/$defs/texturePngPath" }
+      },
+      "additionalProperties": false
+    },
+
+    "properties": {
+      "type": "object",
+      "description": "Mod-specific properties bag; consumed by steps (no hardcoding).",
+      "additionalProperties": true
+    },
+
+    "recipe": {
+      "description": "Optional recipe definition. Strict for common vanilla patterns; extensible via 'custom'.",
+      "oneOf": [
+        {
+          "title": "Crafting shaped",
+          "type": "object",
+          "required": ["type", "pattern", "key", "result"],
+          "properties": {
+            "type": { "const": "minecraft:crafting_shaped" },
+            "pattern": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 3,
+              "items": { "type": "string", "minLength": 1, "maxLength": 3 }
+            },
+            "key": {
+              "type": "object",
+              "description": "Map from single-character symbol to an ingredient.",
+              "patternProperties": {
+                "^[A-Za-z0-9]$": {
+                  "type": "object",
+                  "required": ["item"],
+                  "properties": {
+                    "item": {
+                      "$ref": "common.schema.json#/$defs/mcIdentifier"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            },
+            "result": {
+              "type": "object",
+              "required": ["item"],
+              "properties": {
+                "item": { "$ref": "common.schema.json#/$defs/mcIdentifier" },
+                "count": { "type": "integer", "minimum": 1, "maximum": 64 },
+                "nbt": { "$ref": "common.schema.json#/$defs/jsonObject" }
+              },
+              "additionalProperties": false
+            },
+            "group": { "type": "string", "pattern": "^[a-z0-9/._-]+$" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Crafting shapeless",
+          "type": "object",
+          "required": ["type", "ingredients", "result"],
+          "properties": {
+            "type": { "const": "minecraft:crafting_shapeless" },
+            "ingredients": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 9,
+              "items": {
+                "type": "object",
+                "required": ["item"],
+                "properties": {
+                  "item": { "$ref": "common.schema.json#/$defs/mcIdentifier" }
+                },
+                "additionalProperties": false
+              }
+            },
+            "result": {
+              "type": "object",
+              "required": ["item"],
+              "properties": {
+                "item": { "$ref": "common.schema.json#/$defs/mcIdentifier" },
+                "count": { "type": "integer", "minimum": 1, "maximum": 64 },
+                "nbt": { "$ref": "common.schema.json#/$defs/jsonObject" }
+              },
+              "additionalProperties": false
+            },
+            "group": { "type": "string", "pattern": "^[a-z0-9/._-]+$" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "title": "Custom/unknown recipe",
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "$ref": "common.schema.json#/$defs/mcIdentifier" }
+          },
+          "additionalProperties": true
+        }
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "unevaluatedProperties": false
+}

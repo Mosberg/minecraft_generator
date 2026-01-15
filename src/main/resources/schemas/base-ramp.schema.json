@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosberg.github.io/schemas/generator/base-ramp.schema.json",
+  "title": "Base Ramp",
+  "description": "Defines the base color ramp used to build derived palette maps.",
+  "type": "object",
+  "required": ["schema", "id", "ramp"],
+  "properties": {
+    "schema": { "const": "base-ramp" },
+    "id": { "$ref": "common.schema.json#/$defs/snakeId" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "ramp": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 32,
+      "items": { "$ref": "common.schema.json#/$defs/hex6" }
+    }
+  },
+  "additionalProperties": false,
+  "unevaluatedProperties": false
+}

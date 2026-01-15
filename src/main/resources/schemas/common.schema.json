@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mosberg.github.io/schemas/generator/common.schema.json",
+  "title": "Generator Common Definitions",
+  "type": "object",
+  "$defs": {
+    "snakeId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$",
+      "description": "Lowercase snake_case identifier (used for material/palette ids)."
+    },
+    "mcNamespace": {
+      "type": "string",
+      "pattern": "^[a-z0-9_.-]+$",
+      "description": "Minecraft identifier namespace."
+    },
+    "mcPath": {
+      "type": "string",
+      "pattern": "^[a-z0-9/._-]+$",
+      "description": "Minecraft identifier path."
+    },
+    "mcIdentifier": {
+      "type": "string",
+      "pattern": "^([a-z0-9_.-]+):([a-z0-9/._-]+)$",
+      "description": "Minecraft Identifier in namespace:path form."
+    },
+    "texturePngPath": {
+      "type": "string",
+      "pattern": "^textures/[a-z0-9/._-]+\\.png$",
+      "description": "Resource-relative texture path (inside assets/<modid>/...), including .png."
+    },
+    "hex6": {
+      "type": "string",
+      "pattern": "^[0-9A-Fa-f]{6}$",
+      "description": "6-digit RGB hex without leading # (e.g. 'd8d8d8')."
+    },
+    "hexWithHash": {
+      "type": "string",
+      "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$",
+      "description": "Hex color with leading #, RGB or RGBA."
+    },
+    "jsonObject": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Arbitrary JSON object."
+    },
+
+    "categoryId": {
+      "type": "string",
+      "description": "Allowed category ids shared across schemas.",
+      "enum": [
+        "air",
+        "amethyst",
+        "bamboo",
+        "bambooshoot",
+        "barrier",
+        "bubblecolumn",
+        "buildableglass",
+        "cactus",
+        "cake",
+        "clay",
+        "clothdecoration",
+        "decoration",
+        "dirt",
+        "dye",
+        "egg",
+        "explosive",
+        "fire",
+        "froglight",
+        "frogspawn",
+        "glass",
+        "grass",
+        "heavymetal",
+        "ice",
+        "icesolid",
+        "lava",
+        "leaves",
+        "metal",
+        "metalblock",
+        "metalingot",
+        "metalnugget",
+        "metalore",
+        "metalraw",
+        "moss",
+        "netherwood",
+        "piston",
+        "powdersnow",
+        "plant",
+        "portal",
+        "replaceablefireproofplant",
+        "replaceableplant",
+        "replaceablewaterplant",
+        "sand",
+        "sculk",
+        "shulkershell",
+        "snow",
+        "sponge",
+        "stone",
+        "structuralair",
+        "topsnow",
+        "vegetable",
+        "water",
+        "waterplant",
+        "web",
+        "wood",
+        "woodlog",
+        "woodlogtop",
+        "woodplank",
+        "wool",
+        "bannerpatterns",
+        "bottles",
+        "buckets",
+        "cookedfood",
+        "crafted",
+        "displaystorage",
+        "dyes",
+        "informational",
+        "musicdiscs",
+        "munitions",
+        "naturalplantbased",
+        "other",
+        "poisonous",
+        "potterysherds",
+        "processed",
+        "rawmaterials",
+        "seeds",
+        "smithingtemplates",
+        "supernatural",
+        "tools",
+        "uncookedfood",
+        "vehiclesmobility",
+        "wearableanimals",
+        "wearableplayer",
+        "weapons"
+      ]
+    },
+
+    "weight": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Palette entry weight."
+    },
+    "channelMap": {
+      "type": "object",
+      "description": "Channel mapping keyed by numeric strings (e.g. '102':191).",
+      "patternProperties": {
+        "^[0-9]{1,3}$": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        }
+      },
+      "additionalProperties": false
+    },
+    "weightOrMapping": {
+      "oneOf": [{ "$ref": "#/$defs/weight" }, { "$ref": "#/$defs/channelMap" }]
+    }
+  }
+}
