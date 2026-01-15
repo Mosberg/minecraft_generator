@@ -1,0 +1,39 @@
+{
+  "json.validate.enable": true,
+  "json.schemas": [
+    {
+      "fileMatch": [
+        "**/*.ramp.json",
+        "resources/ramps/*.json",
+        "resources/ramps/**/*.json",
+        "src/main/resources/ramps/*.json",
+        "src/main/resources/ramps/**/*.json"
+      ],
+      "url": "./src/main/resources/schemas/base-ramp.schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/*.material.json",
+        "resources/materials/**/*.json",
+        "src/main/resources/materials/**/*.json"
+      ],
+      "url": "./src/main/resources/schemas/material.schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/*.palette-map.json",
+        "resources/palettes/**/*.palette-map.json",
+        "src/main/resources/palettes/**/*.palette-map.json"
+      ],
+      "url": "./src/main/resources/schemas/palette-map.schema.json"
+    },
+    {
+      "fileMatch": [
+        "**/*.texture-palettes.json",
+        "resources/palettes/**/*.texture-palettes.json",
+        "src/main/resources/palettes/**/*.texture-palettes.json"
+      ],
+      "url": "./src/main/resources/schemas/texture-palettes.schema.json"
+    }
+  ]
+}
