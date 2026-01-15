@@ -13,8 +13,81 @@ A standalone Java tool that generates Minecraft Java Edition assets (models, blo
 
 ## Requirements
 
-- Java 21 or higher
-- Gradle 8.0+ (wrapper included)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Java Version
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# see: https://adoptium.net/
+
+# see: https://adoptium.net/temurin/releases/?version=21
+
+# see: https://adoptium.net/docs
+
+java_version=21
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Gradle Version
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# see: https://gradle.org/
+
+# see: https://docs.gradle.org/9.2.1/userguide/userguide.html
+
+# see: https://docs.gradle.org/9.2.1/javadoc/
+
+gradle_version=9.2.1
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Library Versions
+
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# see: https://mvnrepository.com/artifact/com.google.code.gson/gson
+
+# see: https://mvnrepository.com/artifact/com.google.code.gson/gson/2.13.2
+
+# see: https://github.com/google/gson
+
+gson_version=2.13.2
+
+# see: https://mvnrepository.com/artifact/org.jetbrains/annotations
+
+# see: https://mvnrepository.com/artifact/org.jetbrains/annotations/26.0.2
+
+# see: https://github.com/JetBrains/java-annotations
+
+annotations_version=26.0.2
+
+# see: https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+
+# see: https://mvnrepository.com/artifact/org.slf4j/slf4j-api/2.0.17
+
+# see: https://www.slf4j.org/
+
+slf4j_version=2.0.17
+
+# see: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api
+
+# see: https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api/6.0.2
+
+# see: https://junit.org/
+
+junit_version=6.0.2
+
+# Shading (fat jar) via Shadow plugin
+
+# see: https://mvnrepository.com/artifact/com.gradleup.shadow/shadow-gradle-plugin
+
+# see: https://mvnrepository.com/artifact/com.gradleup.shadow/shadow-gradle-plugin/9.3.1
+
+# see: https://github.com/GradleUp/shadow
+
+shadow_version=9.3.1
 
 ## Installation
 
